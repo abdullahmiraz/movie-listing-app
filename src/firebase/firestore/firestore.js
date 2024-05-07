@@ -17,6 +17,19 @@ export async function addData(collection, id, data) {
 
   return { result, error };
 }
+export async function removeData(collection, id) {
+  let result = null;
+  let error = null;
+
+  try {
+    await deleteDoc(doc(db, collection, id));
+    result = true; // Indicate success
+  } catch (e) {
+    error = e;
+  }
+
+  return { result, error };
+}
 
 export async function getDocument(collection, id) {
   let docRef = doc(db, collection, id);

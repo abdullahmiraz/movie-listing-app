@@ -5,6 +5,7 @@ import { AiFillStar } from "react-icons/ai";
 import { BsCurrencyDollar } from "react-icons/bs";
 import { BiTimeFive } from "react-icons/bi";
 import axios from "axios";
+import { addData, removeData } from "@/firebase/firestore/firestore";
 
 const Page = ({ params }) => {
   const paramsId = params.id;
@@ -37,10 +38,25 @@ const Page = ({ params }) => {
 
   if (!movieData || Object.keys(movieData).length === 0) {
     return <p>No movie movieData found!</p>; // Handle empty data case
-    
   }
 
-  
+  const handleAddToFavorites = async () => {
+    try {
+      await addData("favorites", movieData.id, movieData);
+      setIsFavorite(true);
+    } catch (error) {
+      setError(error);
+    }
+  };
+
+  const handleRemoveFromFavorites = async () => {
+    try {
+      await removeData("favorites", movieData.id);
+      setIsFavorite(false);
+    } catch (error) {
+      setError(error);
+    }
+  };
 
   return (
     <div className="p-6 flex flex-col lg:flex-row items-center content-center mt-12 max-w-6xl h-full mx-auto ">
@@ -53,7 +69,7 @@ const Page = ({ params }) => {
         height={400}
         style={{ maxWidth: "100%", height: "100%" }}
         placeholder="blur"
-        blurmovieDataURL="/spinner.svg"
+        blurDataURL="/spinner.svg" // You need to generate a blurDataURL for the placeholder effect
         alt="Movie Image"
       />
       <div className="sm:w-9/12">
