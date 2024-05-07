@@ -1,65 +1,117 @@
-'use client'
+"use client";
 
-// Import necessary dependencies
-import React, { useState, useEffect } from 'react';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { app } from '@/firebase/firebase.config'; // Assuming you've already set up firebase configuration
+import React, { useState, useEffect } from "react";
 
-// Define the Page component
 const Page = () => {
-  // State to store user data
-  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredFavorites, setFilteredFavorites] = useState([]);
 
-  // Effect to fetch user data from Firebase
   useEffect(() => {
-    const auth = getAuth(app); // Get Firebase Auth instance
-
-    // Listen for authentication state changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in
-        setUser(user);
-      } else {
-        // User is signed out
-        setUser(null);
-      }
-      setLoading(false); // Set loading to false once user data is fetched
-    });
-
-    // Clean up function
-    return () => unsubscribe();
+    const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
+    setFavorites(storedFavorites);
+    setFilteredFavorites(storedFavorites); // Initialize filteredFavorites with all favorites
+    setLoading(false);
   }, []);
 
-  // If loading, display loading message
-  if (loading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  }
+  const handleDelete = (id) => {
+    const updatedFavorites = favorites.filter((movie) => movie.id !== id);
+    setFavorites(updatedFavorites);
+    setFilteredFavorites(updatedFavorites); // Update filteredFavorites after deletion
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+  };
 
-  // If user is signed in, display user details
-  if (user) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div>
-          <h1 className="text-3xl font-bold mb-4">Welcome {user.displayName}</h1>
-          <p className="text-xl">Email: {user.email}</p>
-          {/* Add more user details as needed */}
-        </div>
-      </div>
+  const handleSearch = (e) => {
+    const query = e.target.value.toLowerCase();
+    setSearchQuery(query);
+    const filtered = favorites.filter((movie) =>
+      movie.title.toLowerCase().includes(query)
     );
-  }
+    setFilteredFavorites(filtered); // Update filteredFavorites based on search query
+  };
 
-  // If user is signed out, display sign-in options
+  // Sort favorites alphabetically by title
+  const sortedFavorites = [...filteredFavorites].sort((a, b) =>
+    a.title.localeCompare(b.title)
+  );
+
   return (
     <div className="flex justify-center items-center h-screen">
       <div>
         <h1 className="text-3xl font-bold mb-4">Welcome</h1>
-        <p className="text-xl">Please sign in to view your details</p>
-        {/* Add sign-in options */}
+        {loading ? (
+          <p className="text-xl">Loading...</p>
+        ) : (
+          <>
+            <div className="mb-4">
+              <input
+                type="text"
+                className="border border-gray-300 rounded-md px-3 py-1"
+                placeholder="Search by title..."
+                value={searchQuery}
+                onChange={handleSearch}
+              />
+            </div>
+            {sortedFavorites.length > 0 ? (
+              <>
+                <h2 className="text-2xl font-bold mt-6 mb-2">
+                  Favorite Movies:
+                </h2>
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        ID
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        Title
+                      </th>
+                      <th scope="col" className="relative px-6 py-3">
+                        <span className="sr-only">Delete</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {favorites.map((movie) => (
+                      <tr key={movie.id}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {movie.id}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-900">
+                            {movie.title}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <button
+                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleDelete(movie.id)}
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            ) : (
+              <p className="text-xl">No movies found.</p>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
 };
 
-// Export the Page component
 export default Page;

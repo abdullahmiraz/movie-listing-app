@@ -7,7 +7,7 @@ import { BiTimeFive } from "react-icons/bi";
 import axios from "axios";
 import { addData, removeData } from "@/firebase/firestore/firestore";
 
-const Page = ({ params }) => {
+const Page = ({ params, userId }) => {
   const paramsId = params.id;
   const [isFavorite, setIsFavorite] = useState(false);
   const [movieData, setMovieData] = useState(null);
@@ -40,24 +40,33 @@ const Page = ({ params }) => {
     return <p>No movie movieData found!</p>; // Handle empty data case
   }
 
-  const handleAddToFavorites = async () => {
-    try {
-      await addData("favorites", movieData.id, movieData);
-      setIsFavorite(true);
-    } catch (error) {
-      setError(error);
+  const addToFavorites = (id, title) => {
+    const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
+    // Check if the movie with the same ID already exists
+    const isDuplicate = storedFavorites.some((movie) => movie.id === id);
+    if (!isDuplicate) {
+      storedFavorites.push({ id, title });
+      localStorage.setItem("favorites", JSON.stringify(storedFavorites));
+    } else {
+      alert("Movie already exists in favorites.");
     }
   };
 
-  const handleRemoveFromFavorites = async () => {
-    try {
-      await removeData("favorites", movieData.id);
-      setIsFavorite(false);
-    } catch (error) {
-      setError(error);
-    }
+  const removeFromFavorites = (id) => {
+    const storedFavorites = JSON.parse(localStorage.getItem("favorites")) || [];
+    const updatedFavorites = storedFavorites.filter((fav) => fav.id !== id);
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
   };
 
+  const handleAddToFavorites = () => {
+    addToFavorites(paramsId, movieData.title || movieData.original_title);
+    setIsFavorite(true);
+  };
+
+  const handleRemoveFromFavorites = () => {
+    removeFromFavorites(paramsId);
+    setIsFavorite(false);
+  };
   return (
     <div className="p-6 flex flex-col lg:flex-row items-center content-center mt-12 max-w-6xl h-full mx-auto ">
       <Image
