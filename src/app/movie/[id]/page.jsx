@@ -4,7 +4,7 @@ import { AiFillStar } from "react-icons/ai";
 import { BsCurrencyDollar } from "react-icons/bs";
 import { BiTimeFive } from "react-icons/bi";
 
-const MoviePage = async ({ params }) => {
+const page = async ({ params }) => {
   const paramsId = params.id;
 
   try {
@@ -17,7 +17,7 @@ const MoviePage = async ({ params }) => {
     const data = await api.json();
 
     return (
-      <div className="p-6 flex flex-col lg:flex-row items-center content-center mt-12 max-w-6xl mx-auto ">
+      <div className="p-6 flex flex-col lg:flex-row items-center content-center mt-12 max-w-6xl h-full mx-auto ">
         <Image
           className="rounded-lg mb-4 sm:mr-4"
           src={`https://image.tmdb.org/t/p/w500${
@@ -82,4 +82,4 @@ const MoviePage = async ({ params }) => {
   }
 };
 
-export default MoviePage;
+export default page;

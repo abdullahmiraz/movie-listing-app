@@ -4,6 +4,7 @@ import "./globals.css";
 import Provider from "./Provider";
 import Navbar from "@/components/Navbar/Navbar";
 import SearchBox from "@/components/Search/SearchBox";
+import { AuthContextProvider } from "@/context/AuthContext";
 
 export const metadata = {
   title: "movie-listing-app",
@@ -14,19 +15,21 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
-        <Provider>
-          {/* HEADER SECTION */}
-          <Header />
+        <AuthContextProvider>
+          <Provider>
+            {/* HEADER SECTION */}
+            <Header />
 
-          {/* NAVIGATION SECTION */}
-          <Navbar />
+            {/* NAVIGATION SECTION */}
+            <Navbar />
 
-          {/* SEARCH BOX */}
-          <SearchBox />
+            {/* SEARCH BOX */}
+            <SearchBox />
 
-          {children}
-          <Analytics />
-        </Provider>
+            {children}
+            <Analytics />
+          </Provider>
+        </AuthContextProvider>
       </body>
     </html>
   );
